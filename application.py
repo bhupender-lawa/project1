@@ -93,9 +93,28 @@ def book(book_title):
 @app.route('/review/<book_id>',methods=['GET','POST'])
 def review(book_id):
     if 'user_id' in session:
+        if int(book_id)>300:
+            return render_template('error.html', message= 'The book does not exist in our database.')
         buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+        kk = str(session['user_id'])
         if request.method == "GET":
             return render_template('book.html', buk = buk, reviewKey="1111")
+        review = request.form.get('reviewarea')
+        checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
+        if checkUB is None:
+            db.execute("INSERT INTO ratereview (user_id, book_id, review) VALUES (:U, :B, :RE)",{"U": kk, "B": buk.id, "RE": review})
+            db.commit()
+            return render_template('book.html', buk = buk)
+        if checkUB.review is None:
+            db.execute("UPDATE ratereview SET review = :RE WHERE user_id = :U AND book_id = :B",{"RE": review, "U": kk, "B": buk.id})
+            db.commit()
+            return render_template('book.html', buk = buk)
+        db.execute("UPDATE ratereview SET review = :RE WHERE user_id = :U AND book_id = :B",{"RE": review, "U": kk, "B": buk.id})
+        db.commit()
+        return render_template('book.html', buk = buk)
+
+
+
         return render_template('book.html', buk = buk)
     return redirect(url_for('index'))
 
@@ -105,7 +124,20 @@ def rate(book_id):
         if int(book_id)>300:
             return render_template('error.html', message= 'The book does not exist in our database.')
         buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+        kk = str(session['user_id'])
         if request.method == "GET":
             return render_template('book.html', buk = buk, rateKey="0000")
+        rate = request.form.get('rating')
+        checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
+        if checkUB is None:
+            db.execute("INSERT INTO ratereview (user_id, book_id, rate) VALUES (:U, :B, :R)",{"U": kk, "B": buk.id, "R": rate})
+            db.commit()
+            return render_template('book.html', buk = buk)
+        if checkUB.rating is None:
+            db.execute("UPDATE ratereview SET rating = :R WHERE user_id = :U AND book_id = :B",{"R": rate,"U": kk, "B": buk.id})
+            db.commit()
+            return render_template('book.html', buk = buk)
+        db.execute("UPDATE ratereview SET rating = :R WHERE user_id = :U AND book_id = :B",{"R": rate,"U": kk, "B": buk.id})
+        db.commit()
         return render_template('book.html', buk = buk)
     return redirect(url_for('index'))
