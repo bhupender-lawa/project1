@@ -46,5 +46,6 @@
     <a href="{{ url_for('review', book_id=buk.id) }} " role="button" class="btn btn-primary" value="1111">Review</a>
   {% endif %}
 
-
+  <p>YOUR RATING: <b>{{ rate }}</b> </p>
+  <p>YOUR REVIEW: <b>{{ review }}</b> </p>
 {% endblock %}
