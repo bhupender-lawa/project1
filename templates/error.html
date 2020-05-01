@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Error!
+{% endblock %}
+
+{% block body %}
+  <h2>Error!</h2>
+  <h4>{{ message }}</h4>
+  <a role="button" class="btn btn-outline-danger" href="{{ url_for('index') }}">Home</a>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  {{ buk.title }}
+{% endblock %}
+
+{% block body %}
+
+  <h4 style="text-align: center;">{{ buk.title }}</h4>
+  <p><b>Author:</b>  {{ buk.author }}</p>
+  <p><b>Publication Year:</b> {{ buk.year }}</p>
+  <p><b>ISBN:</b>  {{ buk.isbn }}</p>
+
+{% endblock %}

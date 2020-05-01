@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Sign In
+{% endblock%}
+
+{% block body %}
+  <form action="{{ url_for('login', user= username) }}" method="post">
+    <div class="form-group">
+      <div class="col-lg-4 col-8 col-sm-7">
+        <label for="">Username: </label>
+        <input class="form-control" type="text" name="username" placeholder="Enter Username" required>
+      </div>
+      <div class="col-lg-4 col-8 col-sm-7">
+        <label for="">Password: </label>
+        <input class="form-control" type="password" name="password" placeholder="Enter Password" required><br>
+      </div>
+      <div class="col-lg-2 col-4 col-sm-4">
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </div>
+
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Search Books
+{% endblock %}
+
+{% block body %}
+
+  <a role="button" class="btn btn-outline-primary" href="{{ url_for('index') }}">Logout</a>
+
+  <h2>Welcome {{ name }}!</h2>
+
+  <form action="{{ url_for('search') }}" method="post">
+    <input class="form-group" type="search" name="search" placeholder="Title">
+    <button class="btn btn-outline-secondary">Search</button>
+  </form>
+{% endblock%}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Results
+{% endblock%}
+
+{% block body %}
+  <ul>
+    {% for i in searchList %}
+      <li> <a href="{{ url_for('book', book_title = i.title) }}">{{ i.title }} : by {{ i.author }}</a> </li>
+      {% else %}
+      <h3>Sorry we can't find this book in out database.</h3>
+    {% endfor %}
+    </form>
+  </ul>
+
+{% endblock%}

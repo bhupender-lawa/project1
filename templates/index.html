@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Search Books
+{% endblock %}
+
+{% block body %}
+
+  <a role="button" class="btn btn-outline-primary" href="{{ url_for('login') }}">Sign In</a>
+  <a role="button" class="btn btn-outline-success" href="{{ url_for('signup') }}">Sign Up!</a>
+
+{% endblock%}
