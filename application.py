@@ -8,9 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.urandom(40)
-# sess = Session(app)
-#
-# sess.init_app(app)
 
 
 engine = create_engine(os.getenv("DATABASE_URL"))
@@ -72,14 +69,43 @@ def login():
     name = checkUsername.name
     return redirect(url_for('profile'))
 
-@app.route('/profile/<name>')
-def profile(name):
-    return render_template('profile.html')
+@app.route('/profile')
+def profile():
+    if 'user_id' in session:
+        return render_template('profile.html')
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('index'))
 
 
 @app.route('/<book_title>')
 def book(book_title):
-    yourBook = db.execute("SELECT * FROM books WHERE title = :id", {"id": book_title}).fetchone()
-    if yourBook is None:
-        return render_template('error.html', message = "No Info regarding the book you are looking for.")
-    return render_template('book.html', buk = yourBook)
+    if 'user_id' in session:
+        yourBook = db.execute("SELECT * FROM books WHERE title = :id", {"id": book_title}).fetchone()
+        if yourBook is None:
+            return render_template('error.html', message = "No Info regarding the book you are looking for.")
+        return render_template('book.html', buk = yourBook)
+    return redirect(url_for('index'))
+
+@app.route('/review/<book_id>',methods=['GET','POST'])
+def review(book_id):
+    if 'user_id' in session:
+        buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+        if request.method == "GET":
+            return render_template('book.html', buk = buk, reviewKey="1111")
+        return render_template('book.html', buk = buk)
+    return redirect(url_for('index'))
+
+@app.route('/rate/<book_id>',methods=['GET','POST'])
+def rate(book_id):
+    if 'user_id' in session:
+        if int(book_id)>300:
+            return render_template('error.html', message= 'The book does not exist in our database.')
+        buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+        if request.method == "GET":
+            return render_template('book.html', buk = buk, rateKey="0000")
+        return render_template('book.html', buk = buk)
+    return redirect(url_for('index'))

@@ -12,3 +12,11 @@ CREATE TABLE users(
   username  VARCHAR UNIQUE,
   password  VARCHAR
 );
+
+CREATE TABLE ratereview(
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users,
+  book_id INTEGER REFERENCES books,
+  rating INTEGER,
+  review VARCHAR
+);

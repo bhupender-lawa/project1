@@ -5,10 +5,48 @@
 {% endblock %}
 
 {% block body %}
+  <style>
+    .rate{
+      border: 1px inset grey;
+      /* border-style:  */
+      padding: 5px;
+    }
+  </style>
 
   <h4 style="text-align: center;">{{ buk.title }}</h4>
   <p><b>Author:</b>  {{ buk.author }}</p>
   <p><b>Publication Year:</b> {{ buk.year }}</p>
   <p><b>ISBN:</b>  {{ buk.isbn }}</p>
+
+
+
+
+  {% if rateKey == "0000"  %}
+    <form class="rate  col-lg-4 col-sm-6 col-8" action="{{ url_for('rate', book_id=buk.id) }}" method="post">
+      <div class="form-group">
+        <p>Give a rating as per your experience: </p>
+        {% for i in range(1,6) %}
+          <label >{{ i }}:</label>
+          <input type="radio" name="rating" value="{{i}}" required>
+        {% endfor %}
+        <button class="btn btn-primary btn-sm">Rate</button>
+      </div>
+    </form><br>
+  {% else %}
+    <a href="{{ url_for('rate', book_id=buk.id) }} " role="button" class="btn btn-primary" value="0000">Rate</a>
+  {% endif %}
+
+  {% if reviewKey == "1111"  %}
+    <form class="col-lg-5 col-sm-6 col-8"  action="{{ url_for('review', book_id=buk.id) }}" method="post">
+      <div class="form-group">
+        <textarea class="form-control" name="review" placeholder="Write a review: " required></textarea><br>
+        <button class="btn btn-primary btn-sm">Review</button>
+      </div>
+    </form>
+  {% else %}
+    <a href="{{ url_for('review', book_id=buk.id) }} " role="button" class="btn btn-primary" value="1111">Review</a>
+  {% endif %}
+
+
 
 {% endblock %}
