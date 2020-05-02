@@ -10,11 +10,11 @@
       {% if keyForSignup == 0 %}
       <div class="col-lg-4 col-8 col-sm-7">
         <label for="">Name: </label>
-        <input class="form-control" pattern="[A-Za-z]{3,50}" title="Only Alphabats and 3-50 letters." type="text" name="name" placeholder="Enter your name" required>
+        <input class="form-control" pattern="[A-Za-z\s]{3,50}" title="Only Alphabats and 3-50 letters." type="text" name="name" placeholder="Enter your name" required>
       </div>
       <div class="col-lg-4 col-8 col-sm-7">
         <label for="">Create Username: </label>
-        <input class="form-control" type="text" name="username" placeholder="Create username" required><br>
+        <input class="form-control" pattern="[\S]+" title="No spaces allowed" type="text" name="username" placeholder="Create username" required><br>
       </div>
       {% endif %}
       {% if  keyForSignup == 1 %}

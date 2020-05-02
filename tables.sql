@@ -20,3 +20,11 @@ CREATE TABLE ratereview(
   rating INTEGER,
   review VARCHAR
 );
+
+CREATE TABLE countavg(
+  id SERIAL PRIMARY KEY,
+  book_id INTEGER REFERENCES books,
+  average_rating INTEGER,
+  ratings_count INTEGER,
+  reviews_count INTEGER
+);

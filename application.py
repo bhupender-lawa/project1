@@ -1,4 +1,4 @@
-import os
+import os,requests
 
 from flask import Flask, render_template, redirect, url_for, session, request, g
 from flask_session import Session
@@ -9,9 +9,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = os.urandom(40)
 
-
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
+
+
+
 
 @app.route('/')
 def index():
@@ -101,14 +103,20 @@ def book(book_title):
 @app.route('/review/<book_id>',methods=['GET','POST'])
 def review(book_id):
     if 'user_id' in session:
+        kk = str(session['user_id'])
         if int(book_id)>300:
             return render_template('error.html', message= 'The book does not exist in our database.')
         buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
-        kk = str(session['user_id'])
-        if request.method == "GET":
-            return render_template('book.html', buk = buk, reviewKey="1111")
-        review = request.form.get('reviewarea')
         checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
+        if request.method == "GET":
+            if checkUB is None:
+                return render_template('book.html', buk = buk, reviewKey="1111", rate="Rate it How you experienced.", review="Review The Book.")
+            if checkUB.rating is None:
+                return render_template('book.html', buk = buk, reviewKey="1111", rate="Rate it How you experienced.", review= checkUB.review)
+            if checkUB.review is None:
+                return render_template('book.html', buk = buk, reviewKey="1111", rate=checkUB.rating, review="Review The Book.")
+            return render_template('book.html', buk = buk, reviewKey="1111", rate=checkUB.rating, review=checkUB.review)
+        review = request.form.get('reviewarea')
         if checkUB is None:
             db.execute("INSERT INTO ratereview (user_id, book_id, review) VALUES (:U, :B, :RE)",{"U": kk, "B": buk.id, "RE": review})
             db.commit()
@@ -122,25 +130,27 @@ def review(book_id):
         if checkUB.rating is None:
             return render_template('book.html', buk = buk,rate="Rate it How you experienced.", review=review)
         return render_template('book.html', buk = buk,rate = checkUB.rating, review=review)
-
-
-
-        return render_template('book.html', buk = buk)
     return redirect(url_for('index'))
 
 @app.route('/rate/<book_id>',methods=['GET','POST'])
 def rate(book_id):
     if 'user_id' in session:
+        kk = str(session['user_id'])
         if int(book_id)>300:
             return render_template('error.html', message= 'The book does not exist in our database.')
         buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
-        kk = str(session['user_id'])
-        if request.method == "GET":
-            return render_template('book.html', buk = buk, rateKey="0000")
-        rate = request.form.get('rating')
         checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
+        if request.method == "GET":
+            if checkUB is None:
+                return render_template('book.html', buk = buk, rateKey="0000", rate="Rate it How you experienced.", review="Review The Book.")
+            if checkUB.rating is None:
+                return render_template('book.html', buk = buk, rateKey="0000", rate="Rate it How you experienced.", review= checkUB.review)
+            if checkUB.review is None:
+                return render_template('book.html', buk = buk, rateKey="0000", rate=checkUB.rating, review="Review The Book.")
+            return render_template('book.html', buk = buk, rateKey="0000", rate=checkUB.rating, review=checkUB.review)
+        rate = request.form.get('rating')
         if checkUB is None:
-            db.execute("INSERT INTO ratereview (user_id, book_id, rate) VALUES (:U, :B, :R)",{"U": kk, "B": buk.id, "R": rate})
+            db.execute("INSERT INTO ratereview (user_id, book_id, rating) VALUES (:U, :B, :R)",{"U": kk, "B": buk.id, "R": rate})
             db.commit()
             return render_template('book.html', buk = buk, rate = rate, review="Review The Book.")
         if checkUB.rating is None:
@@ -152,4 +162,37 @@ def rate(book_id):
         if checkUB.review is None:
             return render_template('book.html', buk = buk, rate = rate,review="Review The Book.")
         return render_template('book.html', buk = buk, rate = rate, review=checkUB.review)
+    return redirect(url_for('index'))
+
+@app.route('/goodreads_reviews/isbn/<book_isbn>', methods=['GET','POST'])
+def goodreads(book_isbn):
+    if 'user_id' in session:
+        kk = str(session['user_id'])
+        buk = db.execute("SELECT * FROM books WHERE isbn = :id", {"id": book_isbn}).fetchone()
+        if buk is None:
+            return render_template('error.html', message= f"Book with ISBN \"{book_isbn}\" is not in our Database. Please check the URL or Search again.")
+        ss = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
+        if request.method == "GET":
+            if ss is None:
+                return render_template('book.html', buk = buk, rate="Rate it How you experienced.", review="Review The Book.")
+            if ss.rating is None:
+                return render_template('book.html', buk = buk, rate="Rate it How you experienced.", review= ss.review)
+            if ss.review is None:
+                return render_template('book.html', buk = buk, rate=ss.rating, review="Review The Book.")
+            return render_template('book.html', buk = buk, rate=ss.rating, review=ss.review)
+        try:
+            res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "BpmVmMTdAtNjJJZhdnbSQ", "isbns": f"{buk.isbn}"})
+        except:
+            return render_template('error.html', message="Network error. Check your connection.")
+        avgR = res.json()["books"][0]['average_rating']
+        rateC = res.json()["books"][0]['ratings_count']
+        revC = res.json()["books"][0]['reviews_count']
+        isbn13 = res.json()["books"][0]['isbn13']
+        if ss is None:
+            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate="Rate it How you experienced.", review="Review The Book.",avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
+        if ss.rating is None:
+            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate="Rate it How you experienced.", review= ss.review,avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
+        if ss.review is None:
+            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate=ss.rating, review="Review The Book.",avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
+        return render_template('book.html', buk = buk, goodreadsKey = "2222", rate=ss.rating, review=ss.review,avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
     return redirect(url_for('index'))

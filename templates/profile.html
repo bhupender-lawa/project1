@@ -11,7 +11,7 @@
   <h2>Welcome {{ name }}!</h2>
 
   <form action="{{ url_for('search') }}" method="post">
-    <input class="form-group" type="search" name="search" placeholder="Title">
+    <input class="form-group" type="search" name="search" placeholder="ISBN or Title or Author" required>
     <button class="btn btn-outline-secondary">Search</button>
   </form>
 {% endblock%}
