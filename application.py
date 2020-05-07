@@ -88,7 +88,7 @@ def logout():
 
 ################################################################################################################################################################
 
-@app.route('/<book_id>')
+@app.route('/<int:book_id>')
 def book(book_id):
     if 'user_id' in session:
         kk= str(session['user_id'])
@@ -140,6 +140,8 @@ def rare(book_id):
 @app.route('/api/<isbn>')
 def api(isbn):
     book = db.execute("SELECT * FROM books WHERE isbn = :i",{"i": isbn}).fetchone()
+    if book is None:
+        return render_template('error.html', message=f"404 Error! Requested book assosciated with ISBN \"{isbn}\" not found.")
     avgncount = db.execute("SELECT * FROM countnavg WHERE book_id = :b",{"b": book.id}).fetchone()
     json = {"title": f"{book.title}",
             "author": f"{book.author}",
