@@ -1,66 +1,65 @@
 {% extends "layout.html" %}
 
 {% block title %}
-  {{ buk.title }}
+  {{ book.title }}
 {% endblock %}
 
 {% block body %}
-            <style>
-              .rate{
-                border: 1px inset grey;
-                /* border-style:  */
-                padding: 5px;
-              }
-            </style>
 
-            <h4 style="text-align: center;">{{ buk.title }}</h4>
-            <p><b>Author: </b>  {{ buk.author }}</p>
-            <p><b>Publication Year: </b> {{ buk.year }}</p>
-            <p><b>ISBN: </b>  {{ buk.isbn }}</p>
+    <h4 style="text-align: center;">{{ book.title }}</h4>
+    <p><b>Author: </b>  {{ book.author }}</p>
+    <p><b>Publication Year: </b> {{ book.year }}</p>
+    <p><b>ISBN: </b>  {{ book.isbn }}</p>
+    <div style="background: ghostwhite; padding: 10px;">
+      {% if rarekey == 0 %}
+        <p> <b><i>Rate and Review the book: </i></b> </p>
+        <form action="{{ url_for('rare', book_id= book.id) }}" method="post">
+          <i>Choose star rating: </i>
+          <div class="form-group">
+            <div>
+              <input id="rate1" type="radio" name="rate" value="1" required>
+              <label for="rate1">:⭐</label>
+            </div>
+            <div>
+              <input id="rate2" type="radio" name="rate" value="2" required>
+              <label for="rate2">:⭐⭐</label>
+            </div>
+            <div>
+              <input id="rate3" type="radio" name="rate" value="3" required>
+              <label for="rate3">:⭐⭐⭐</label>
+            </div>
+            <div>
+              <input id="rate4" type="radio" name="rate" value="4" required>
+              <label for="rate4">:⭐⭐⭐⭐</label>
+            </div>
+            <div>
+              <input id="rate5" type="radio" name="rate" value="5" required>
+              <label for="rate5">:⭐⭐⭐⭐⭐</label>
+            </div>
+          </div>
+          <i>Write a review: </i>
+          <textarea class="form-control col-lg-5 col-md-7 col-sm-9 col-11" name="reviewarea" rows="4" placeholder="Please write a review: " required></textarea><br>
+          <button type="submit" name="reviewbtn" class="btn btn-primary">Rate and Review</button>
+        </form>
+      {% else %}
+        <p>Your Rating: <b>{{ rating }}</b></p>
+        <p>Your Review: <b>{{ review }}</b></p>
+      {% endif %}
+    </div>
 
+    <br>
 
+    <div style="background: ghostwhite; padding: 10px;">
+        <h5><b><i>goodreads</i></b>'s reviews: </h5>
+        <p>Ratings count: <b>{{ ratC }}</b></p>
+        <p>Average rating: <b>{{ avgR }}</b></p>
+    </div>
 
+    <br>
 
-            {% if rateKey == "0000"  %}
-              <form class="rate  col-lg-4 col-sm-6 col-8" action="{{ url_for('rate', book_id=buk.id) }}" method="post">
-                <div class="form-group">
-                  <p>Give a rating as per your experience: </p>
-                  {% for i in range(1,6) %}
-                    <label >{{ i }}:</label>
-                    <input type="radio" name="rating" value="{{i}}" required>
-                  {% endfor %}
-                  <button class="btn btn-primary btn-sm">Rate</button>
-                </div>
-              </form><br>
-            {% else %}
-              <a href="{{ url_for('rate', book_id=buk.id) }} " role="button" class="btn btn-primary" value="0000">Rate</a>
-            {% endif %}
-
-            {% if reviewKey == "1111"  %}
-              <form class="col-lg-5 col-sm-6 col-8"  action="{{ url_for('review', book_id=buk.id) }}" method="post">
-                <div class="form-group">
-                  <textarea class="form-control" name="reviewarea" placeholder="Write a review: " required></textarea><br>
-                  <button class="btn btn-primary btn-sm">Review</button>
-                </div>
-              </form>
-            {% else %}
-              <a href="{{ url_for('review', book_id=buk.id) }} " role="button" class="btn btn-primary" value="1111">Review</a>
-            {% endif %}
-
-            <p>YOUR RATING: <b>{{ rate }}</b> </p>
-            <p>YOUR REVIEW: <b>{{ review }}</b> </p>
-
-            {% if goodreadsKey == "2222"  %}
-              <form action="{{ url_for('goodreads', book_isbn=buk.isbn) }} " method="get">
-                <p>GOODREADS AVERAGE RATING: <b>{{ avgR }}</b> </p>
-                <p> NO. OF RATINGS RECEIVED: <b>{{ rateC }}</b> </p>
-                <p>GOODREADS Review counts: <b>{{ revC }}</b> </p>
-                <p> <b>ISBN13: </b>{{ isbn13 }}</p>
-                <button class="btn btn-primary btn-sm">Close</button>
-              </form>
-            {% else %}
-              <form action="{{ url_for('goodreads', book_isbn=buk.isbn) }}" method="post">
-                <button class="btn btn-outline-success">Check <b><i>goodreads</i></b> reviews</button>
-              </form>
-            {% endif %}
+    <div style="background: ghostwhite; padding: 10px;">
+        <h5><b><i>BookSniffer</i></b>'s reviews: </h5>
+        <p>Ratings count: <b>{{ ratCb }}</b></p>
+        <p>Average rating: <b>{{ avgRb }}</b></p>
+    </div>
 {% endblock %}

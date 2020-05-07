@@ -12,21 +12,13 @@ app.secret_key = os.urandom(40)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-
-
+################################################################################################################################################################
 
 @app.route('/')
 def index():
     if 'user_id' in session:
         return redirect(url_for('profile'))
     return render_template("index.html")
-
-@app.route('/search', methods=['POST'])
-def search():
-    query = request.form.get('search')
-    q = "%" + query + "%"
-    kk = db.execute("SELECT * FROM books WHERE title LIKE :q OR isbn LIKE :i OR author LIKE :j", {"q": q, "i": q, "j": q}).fetchall()
-    return render_template("search_result.html", searchList = kk)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -68,8 +60,9 @@ def login():
     if not check_password_hash(checkUsername.password, str(password)):
         return render_template('error.html', message="Incorrect Password")
     session['user_id'] = checkUsername.id
-    name = checkUsername.name
+    # name = checkUsername.name
     return redirect(url_for('profile'))
+
 
 @app.route('/profile')
 def profile():
@@ -77,122 +70,81 @@ def profile():
         return render_template('profile.html')
     return redirect(url_for('index'))
 
+
+@app.route('/search', methods=['POST'])
+def search():
+    if 'user_id' in session:
+        query = request.form.get('search')
+        q = "%" + query + "%"
+        kk = db.execute("SELECT * FROM books WHERE title LIKE :q OR isbn LIKE :i OR author LIKE :j", {"q": q, "i": q, "j": q}).fetchall()
+        return render_template("search_result.html", searchList = kk)
+    return redirect(url_for('index'))
+
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
+################################################################################################################################################################
 
-@app.route('/<book_title>')
-def book(book_title):
+@app.route('/<book_id>')
+def book(book_id):
     if 'user_id' in session:
-        kk = str(session['user_id'])
-        yourBook = db.execute("SELECT * FROM books WHERE title = :id", {"id": book_title}).fetchone()
-        if yourBook is None:
-            return render_template('error.html', message = "No Info regarding the book you are looking for.")
-        ss = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": yourBook.id}).fetchone()
-        if ss is None:
-            return render_template('book.html', buk = yourBook, rate="Rate it How you experienced.", review="Review The Book.")
-        if ss.rating is None:
-            return render_template('book.html', buk = yourBook, rate="Rate it How you experienced.", review= ss.review)
-        if ss.review is None:
-            return render_template('book.html', buk = yourBook, rate=ss.rating, review="Review The Book.")
-        return render_template('book.html', buk = yourBook, rate=ss.rating, review=ss.review)
-    return redirect(url_for('index'))
-
-@app.route('/review/<book_id>',methods=['GET','POST'])
-def review(book_id):
-    if 'user_id' in session:
-        kk = str(session['user_id'])
-        if int(book_id)>300:
-            return render_template('error.html', message= 'The book does not exist in our database.')
-        buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
-        checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
-        if request.method == "GET":
-            if checkUB is None:
-                return render_template('book.html', buk = buk, reviewKey="1111", rate="Rate it How you experienced.", review="Review The Book.")
-            if checkUB.rating is None:
-                return render_template('book.html', buk = buk, reviewKey="1111", rate="Rate it How you experienced.", review= checkUB.review)
-            if checkUB.review is None:
-                return render_template('book.html', buk = buk, reviewKey="1111", rate=checkUB.rating, review="Review The Book.")
-            return render_template('book.html', buk = buk, reviewKey="1111", rate=checkUB.rating, review=checkUB.review)
-        review = request.form.get('reviewarea')
-        if checkUB is None:
-            db.execute("INSERT INTO ratereview (user_id, book_id, review) VALUES (:U, :B, :RE)",{"U": kk, "B": buk.id, "RE": review})
-            db.commit()
-            return render_template('book.html', buk = buk,rate="Rate it How you experienced.", review=review)
-        if checkUB.review is None:
-            db.execute("UPDATE ratereview SET review = :RE WHERE user_id = :U AND book_id = :B",{"RE": review, "U": kk, "B": buk.id})
-            db.commit()
-            return render_template('book.html', buk = buk,rate = checkUB.rating, review=review)
-        db.execute("UPDATE ratereview SET review = :RE WHERE user_id = :U AND book_id = :B",{"RE": review, "U": kk, "B": buk.id})
-        db.commit()
-        if checkUB.rating is None:
-            return render_template('book.html', buk = buk,rate="Rate it How you experienced.", review=review)
-        return render_template('book.html', buk = buk,rate = checkUB.rating, review=review)
-    return redirect(url_for('index'))
-
-@app.route('/rate/<book_id>',methods=['GET','POST'])
-def rate(book_id):
-    if 'user_id' in session:
-        kk = str(session['user_id'])
-        if int(book_id)>300:
-            return render_template('error.html', message= 'The book does not exist in our database.')
-        buk = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
-        checkUB = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
-        if request.method == "GET":
-            if checkUB is None:
-                return render_template('book.html', buk = buk, rateKey="0000", rate="Rate it How you experienced.", review="Review The Book.")
-            if checkUB.rating is None:
-                return render_template('book.html', buk = buk, rateKey="0000", rate="Rate it How you experienced.", review= checkUB.review)
-            if checkUB.review is None:
-                return render_template('book.html', buk = buk, rateKey="0000", rate=checkUB.rating, review="Review The Book.")
-            return render_template('book.html', buk = buk, rateKey="0000", rate=checkUB.rating, review=checkUB.review)
-        rate = request.form.get('rating')
-        if checkUB is None:
-            db.execute("INSERT INTO ratereview (user_id, book_id, rating) VALUES (:U, :B, :R)",{"U": kk, "B": buk.id, "R": rate})
-            db.commit()
-            return render_template('book.html', buk = buk, rate = rate, review="Review The Book.")
-        if checkUB.rating is None:
-            db.execute("UPDATE ratereview SET rating = :R WHERE user_id = :U AND book_id = :B",{"R": rate,"U": kk, "B": buk.id})
-            db.commit()
-            return render_template('book.html', buk = buk, rate = rate, review=checkUB.review)
-        db.execute("UPDATE ratereview SET rating = :R WHERE user_id = :U AND book_id = :B",{"R": rate,"U": kk, "B": buk.id})
-        db.commit()
-        if checkUB.review is None:
-            return render_template('book.html', buk = buk, rate = rate,review="Review The Book.")
-        return render_template('book.html', buk = buk, rate = rate, review=checkUB.review)
-    return redirect(url_for('index'))
-
-@app.route('/goodreads_reviews/isbn/<book_isbn>', methods=['GET','POST'])
-def goodreads(book_isbn):
-    if 'user_id' in session:
-        kk = str(session['user_id'])
-        buk = db.execute("SELECT * FROM books WHERE isbn = :id", {"id": book_isbn}).fetchone()
-        if buk is None:
-            return render_template('error.html', message= f"Book with ISBN \"{book_isbn}\" is not in our Database. Please check the URL or Search again.")
-        ss = db.execute("SELECT * FROM ratereview WHERE user_id = :U AND book_id = :B",{"U": kk, "B": buk.id}).fetchone()
-        if request.method == "GET":
-            if ss is None:
-                return render_template('book.html', buk = buk, rate="Rate it How you experienced.", review="Review The Book.")
-            if ss.rating is None:
-                return render_template('book.html', buk = buk, rate="Rate it How you experienced.", review= ss.review)
-            if ss.review is None:
-                return render_template('book.html', buk = buk, rate=ss.rating, review="Review The Book.")
-            return render_template('book.html', buk = buk, rate=ss.rating, review=ss.review)
+        kk= str(session['user_id'])
+        book = db.execute("SELECT * FROM books WHERE id = :t",{"t": book_id}).fetchone()
+        rare = db.execute("SELECT * FROM ratereview WHERE user_id =  :u AND book_id = :b",{"u": kk, "b": book.id}).fetchone()
         try:
-            res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "BpmVmMTdAtNjJJZhdnbSQ", "isbns": f"{buk.isbn}"})
+            res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "BpmVmMTdAtNjJJZhdnbSQ", "isbns": f"{book.isbn}"})
         except:
-            return render_template('error.html', message="Network error. Check your connection.")
-        avgR = res.json()["books"][0]['average_rating']
-        rateC = res.json()["books"][0]['ratings_count']
-        revC = res.json()["books"][0]['reviews_count']
-        isbn13 = res.json()["books"][0]['isbn13']
-        if ss is None:
-            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate="Rate it How you experienced.", review="Review The Book.",avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
-        if ss.rating is None:
-            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate="Rate it How you experienced.", review= ss.review,avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
-        if ss.review is None:
-            return render_template('book.html', buk = buk, goodreadsKey = "2222", rate=ss.rating, review="Review The Book.",avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
-        return render_template('book.html', buk = buk, goodreadsKey = "2222", rate=ss.rating, review=ss.review,avgR =avgR, rateC = rateC, revC = revC, isbn13 = isbn13)
+            return render_template("error.html", message=f"Check your \'connection\' or the url input")
+        avgR = res.json()['books'][0]['average_rating']
+        ratC = res.json()['books'][0]['ratings_count']
+        count = db.execute("SELECT * FROM countnavg WHERE book_id = :b",{"b": book_id}).fetchone()
+        if count is not None:
+            avgRb = count.avg
+            ratCb = count.count
+        else:
+            avgRb = "Please rate and review."
+            ratCb = "Be the First one to rate and review."
+        if rare is None:
+            return render_template('book.html', book= book, rarekey=0, avgR=avgR, ratC=ratC, avgRb=avgRb, ratCb= ratCb)
+        rating = rare.rating
+        review = rare.review
+        return render_template('book.html', book= book, rating=rating, review=review, avgR=avgR, ratC=ratC, avgRb=avgRb, ratCb= ratCb)
     return redirect(url_for('index'))
+
+@app.route('/rate/<book_id>', methods=['POST'])
+def rare(book_id):
+    if 'user_id' in session:
+        kk= str(session['user_id'])
+        rating = request.form.get('rate')
+        review = request.form.get("reviewarea")
+        avgncount = db.execute("SELECT * FROM countnavg WHERE book_id = :b",{"b": book_id}).fetchone()
+        if avgncount is None:
+            db.execute("INSERT INTO countnavg (book_id, avg, count) VALUES (:b, :a, 1)",{"b": book_id, "a": int(rating)})
+            db.commit()
+        else:
+            count = avgncount.count
+            avg = avgncount.avg
+            avg = ((avg * count + int(rating)) / (count+1))
+            db.execute("UPDATE countnavg SET avg = :a, count = :c WHERE book_id = :b",{"a": avg, "c": count+1, "b": book_id})
+            db.commit()
+        db.execute("INSERT INTO ratereview (user_id, book_id, rating, review) VALUES (:u, :b, :r, :re)",{"u": kk, "b": book_id, "r": rating, "re": review})
+        db.commit()
+        return redirect(url_for('book', book_id=book_id))
+    return redirect(url_for('index'))
+
+################################################################################################################################################################
+
+@app.route('/api/<isbn>')
+def api(isbn):
+    book = db.execute("SELECT * FROM books WHERE isbn = :i",{"i": isbn}).fetchone()
+    avgncount = db.execute("SELECT * FROM countnavg WHERE book_id = :b",{"b": book.id}).fetchone()
+    json = {"title": f"{book.title}",
+            "author": f"{book.author}",
+            "year": f"{book.year}",
+            "isbn": f"{book.isbn}",
+            "review_count": f"{avgncount.count}",
+            "average_score": f"{avgncount.avg}"}
+    return json

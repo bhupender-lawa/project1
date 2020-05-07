@@ -9,7 +9,7 @@ db = scoped_session(sessionmaker(bind=engine))
 
 
 def main():
-    f = open('books1-300.csv')
+    f = open('books.csv')
     reader = csv.reader(f)
     for i, t, a, y in reader:
         db.execute("INSERT INTO books (isbn, title, author, year) VALUES (:i, :t, :a, :y)", {"i": i, "t": t, "a": a, "y": y})
