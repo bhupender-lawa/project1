@@ -4,49 +4,37 @@
   Search Books
 {% endblock %}
 
-<!-- <<<<<<< Updated upstream -->
-{% block body %}
-
-  <!-- <a role="button" class="btn btn-outline-primary" href="{{ url_for('index') }}">Logout</a> -->
-<!-- ======= -->
 {% block navIn %} {% endblock %}
-<!-- >>>>>>> Stashed changes -->
 
-  <style>
-    #mysearch{
-      border: 1px solid rgb(0, 0, 255, .4);
-      border-radius: 30px;
-      padding: 10px;
-      width: 95%;
-      text-align: center;
-      box-shadow: 2px 2px 4px black;
-      margin: 20px;
-      outline: none;
-    }
-    @media (any-hover) {
-      #mysearch:hover {
-        box-shadow: 3px 3px 10px black;
-      }
-    }
-    #mysearchbtn{
-      margin: 10px;
-      width: 20%;
-      box-shadow: 3px 3px 10px black;
-    }
-  </style>
+{% block body %}
+      <style>
+        #mysearch{
+          border: 1px solid rgb(0, 0, 255, .4);
+          border-radius: 30px;
+          padding: 10px;
+          width: 95%;
+          text-align: center;
+          box-shadow: 2px 2px 4px black;
+          margin: 20px;
+          outline: none;
+        }
+        @media (any-hover) {
+          #mysearch:hover {
+            box-shadow: 3px 3px 10px black;
+          }
+        }
+        #mysearchbtn{
+          margin: 10px;
+          width: 20%;
+          box-shadow: 3px 3px 10px black;
+        }
+      </style>
 
-<!-- <<<<<<< Updated upstream -->
-  <!-- <form action="{{ url_for('search') }}" method="post">
-    <input class="form-group" type="search" name="search" placeholder="Title">
-    <button class="btn btn-outline-secondary">Search</button>
-  </form> -->
-<!-- ======= -->
-  <div align="center">
-    <h2>Welcome, Search Your Books!</h2>
-    <form action="{{ url_for('search') }}" method="post">
-      <input id="mysearch" type="search" name="search" placeholder="Enter Book Title or Author or ISBN" required><br>
-      <button class="btn btn-primary" id="mysearchbtn">Search</button>
-    </form>
-  </div>
-<!-- >>>>>>> Stashed changes -->
+      <div align="center">
+        <h2>Welcome, Search Your Books!</h2>
+        <form action="{{ url_for('search') }}" method="post">
+          <input id="mysearch" type="search" name="search" placeholder="Enter Book Title or Author or ISBN" required><br>
+          <button class="btn btn-primary" id="mysearchbtn">Search</button>
+        </form>
+      </div>
 {% endblock %}
