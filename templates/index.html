@@ -4,9 +4,32 @@
   BookSniffer
 {% endblock %}
 
+{% block navOut %} {% endblock %}
+
 {% block body %}
+  <style media="screen">
+    .jumbotron{
+      padding: 0px;
+      background: none;
+    }
+    .otext{
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
+      color: white;
+      border: 3px solid #f1f1f1;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      width: 80%;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
 
-  <a role="button" class="btn btn-outline-primary" href="{{ url_for('login') }}">Sign In</a>
-  <a role="button" class="btn btn-outline-success" href="{{ url_for('signup') }}">Sign Up!</a>
-
+  <div class="otext">
+    <h1> <b> <i>BookSniffer</i> </b> </h1>
+    <h4>Welcome! Here you can see Book reviews and tell us your experience about the book.</h4>
+  </div>
 {% endblock%}

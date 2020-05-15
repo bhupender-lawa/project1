@@ -4,6 +4,8 @@
   Sign In
 {% endblock%}
 
+{% block navOut %} {% endblock %}
+
 {% block body %}
   <form action="{{ url_for('login', user= username) }}" method="post">
     <div class="form-group">

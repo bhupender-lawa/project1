@@ -11,9 +11,18 @@
   <body style="background: grey;">
     <nav class="navbar navbar-extend navbar-dark bg-dark">
       <a class="navbar-brand" href="{{ url_for('index') }}">Home</a>
+      <div class="nav navbar ">
+        {% block navOut %}
+          <a class="nav-link ml-auto" href="{{ url_for('logout') }}">Logout</a>
+        {% endblock %}
+        {% block navIn %}
+          <a class="nav-link" href="{{ url_for('login') }}">Sign In</a>
+          <a class="nav-link" href="{{ url_for('signup') }}">Sign Up!</a>
+        {% endblock %}
+      </div>
     </nav>
 
-    <div class="container jumbotron" >
+    <div class="jumbotron" >
       {% block body %}
 
       {% endblock %}
